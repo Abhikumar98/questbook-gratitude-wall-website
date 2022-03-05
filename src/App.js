@@ -115,7 +115,9 @@ function App() {
 	return (
 		<div className="h-screen w-screen p-8 flex flex-col">
 			<div className="flex items-center justify-between mx-24 pb-8">
-				<div className="uppercase font-bold">Gratitude wall</div>
+				<div className="uppercase font-bold cursor-pointer">
+					Gratitude wall
+				</div>
 				<div className="flex items-center">
 					{!!wallet ? (
 						<div className="p-2 border-2 rounded-md">
