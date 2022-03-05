@@ -21,7 +21,7 @@ export const checkIfWalletIsConnected = async () => {
 
 		// String, hex code of the chainId of the Rinkebey test network
 		// const rinkebyChainId = "0x4";
-		const mainnetChainId = "0x1";
+		const mainnetChainId = "0x4";
 		if (chainId !== mainnetChainId) {
 			throw new Error("Please connect to the mainnet");
 		}
