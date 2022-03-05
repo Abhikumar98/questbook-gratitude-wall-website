@@ -135,6 +135,11 @@ function App() {
 			{!!wallet ? (
 				<div className=" flex items-center justify-center mx-24 h-4/5 my-8 space-x-8">
 					<div className="rounded-md border-4 w-3/5 h-full overflow-auto p-4 space-y-4">
+						{!gratitudes.length && (
+							<div className="flex items-center justify-center h-full flex-col space-y-4">
+								<div>No one shown any gratitude yet :(</div>
+							</div>
+						)}
 						{gratitudes.map((gratitude) => (
 							<div key={gratitude.timestamp}>
 								<p className="text-xs mb-1">
