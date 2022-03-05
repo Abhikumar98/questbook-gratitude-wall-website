@@ -5,7 +5,7 @@ import {
 	connectWallet,
 	minimizeAddress,
 } from "./utils";
-import { contract, listenEvents } from "./utils/crypto";
+import { contract } from "./utils/crypto";
 import human from "human-time";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -68,7 +68,7 @@ function App() {
 			toast.success(`Thanks for showing gratitude :)`);
 		} catch (error) {
 			console.error(error);
-			toast.error(error);
+			toast.error(error.message ?? "Something went wrong");
 		} finally {
 			setLoading(false);
 		}
@@ -88,7 +88,7 @@ function App() {
 	};
 
 	const startListening = async () => {
-		listenEvents().on(
+		contract().on(
 			"GratitudeEvent",
 			(from, to, message, timestamp, amount) =>
 				fetchGratitudes(from, to, message, timestamp, amount)
@@ -109,7 +109,7 @@ function App() {
 			startListening();
 			fetchPreviousGratitudes();
 		}
-		return wallet && listenEvents().off("GratitudeEvent", fetchGratitudes);
+		return wallet && contract().off("GratitudeEvent", fetchGratitudes);
 	}, [wallet]);
 
 	return (

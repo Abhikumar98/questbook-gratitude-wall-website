@@ -7,24 +7,9 @@ export const contract = () => {
 		const provider = new ethers.providers.Web3Provider(ethereum);
 		const signer = provider.getSigner();
 		const contractReader = new ethers.Contract(
-			"0xc32905b656fbfAa6d10C2037aD031E2002a4dc5d",
+			"0x4BA4CDFfDEbDC13c5A87bDCa0D195D07e89833f2",
 			abi,
 			signer
-		);
-		return contractReader;
-	}
-
-	return null;
-};
-
-export const listenEvents = () => {
-	const { ethereum } = window;
-	if (ethereum) {
-		const provider = new ethers.providers.Web3Provider(ethereum);
-		const contractReader = new ethers.Contract(
-			"0xc32905b656fbfAa6d10C2037aD031E2002a4dc5d",
-			abi,
-			provider
 		);
 		return contractReader;
 	}
