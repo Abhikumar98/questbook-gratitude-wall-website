@@ -56,14 +56,22 @@ function App() {
 	};
 
 	const handleGratitudeSubmit = async () => {
-		const tx = await contract().addGratitude(reciever, message, {
-			value: parseEther(amount),
-		});
-		setReciever("");
-		setAmount(0);
-		setMessage("");
-		await tx.wait();
-		toast.success(`Gratitude sent! Tx: ${tx.hash}`);
+		try {
+			setLoading(true);
+			const tx = await contract().addGratitude(reciever, message, {
+				value: parseEther(amount),
+			});
+			setReciever("");
+			setAmount(0);
+			setMessage("");
+			await tx.wait();
+			toast.success(`Thanks for showing gratitude :)`);
+		} catch (error) {
+			console.error(error);
+			toast.error(error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const fetchGratitudes = async (from, to, message, timestamp, amount) => {
@@ -75,11 +83,20 @@ function App() {
 			timestamp: timestamp.toString() * 1000,
 			message: message,
 		};
-		setGratitudes([newGratitude, ...gratitudes]);
+		console.log([newGratitude, ...gratitudes]);
+		setGratitudes((prevState) => [newGratitude, ...prevState]);
 	};
 
 	const startListening = async () => {
-		listenEvents().on("GratitudeEvent", fetchGratitudes);
+		listenEvents().on(
+			"GratitudeEvent",
+			(from, to, message, timestamp, amount) =>
+				fetchGratitudes(from, to, message, timestamp, amount)
+		);
+	};
+
+	const sendUserGratitude = (address) => {
+		setReciever(address);
 	};
 
 	useEffect(() => {
@@ -101,7 +118,7 @@ function App() {
 				<div className="uppercase font-bold">Gratitude wall</div>
 				<div className="flex items-center">
 					{!!wallet ? (
-						<div className="p-2 border-2 ">
+						<div className="p-2 border-2 rounded-md">
 							{minimizeAddress(wallet)}
 						</div>
 					) : (
@@ -123,11 +140,49 @@ function App() {
 								<p className="text-xs mb-1">
 									{human(new Date(gratitude.timestamp))}
 								</p>
-								<div className="w-3/4 rounded-md rounded-b-md border-2 ">
-									<div className="border-b-2 p-2 bg-indigo-400 text-white rounded-t-md">
-										{minimizeAddress(gratitude.from)} sent{" "}
-										{formatEther(gratitude.amount)} eth to{" "}
-										{minimizeAddress(gratitude.to)}
+								<div className="w-3/4 rounded-md rounded-b-md border-gray-200 border-2 ">
+									<div className="border-b-2 p-2 border-gray-200 bg-gray-100">
+										<span
+											className={`font-bold mr-1 cursor-pointer px-1 transition-all border border-gray-100 ease-in-out hover:text-white hover:bg-gray-400 rounded-md ${
+												wallet &&
+												wallet.toLowerCase() ===
+													gratitude.from.toLowerCase()
+													? ""
+													: " cursor-pointer"
+											}`}
+											onClick={() =>
+												sendUserGratitude(
+													gratitude.from
+												)
+											}
+										>
+											{minimizeAddress(
+												gratitude.from,
+												wallet
+											)}
+										</span>
+										sent{" "}
+										<span className="mx-1 font-bold">
+											{formatEther(gratitude.amount)} eth
+										</span>
+										to{" "}
+										<span
+											className={` font-bold mr-4 cursor-pointer px-1 transition-all border border-gray-100 ease-in-out hover:text-white hover:bg-gray-400 rounded-md ${
+												wallet &&
+												wallet.toLowerCase() ===
+													gratitude.to.toLowerCase()
+													? ""
+													: " cursor-pointer"
+											}`}
+											onClick={() =>
+												sendUserGratitude(gratitude.to)
+											}
+										>
+											{minimizeAddress(
+												gratitude.to,
+												wallet
+											)}
+										</span>
 									</div>
 									<div className="p-2">
 										{gratitude.message}
@@ -139,8 +194,7 @@ function App() {
 					<div className="rounded-md border-4 w-2/5 h-full p-8">
 						<div className="flex flex-col space-y-8">
 							<div className="text-2xl font-bold">
-								Show Gratitude towards those who helped you once
-								:)
+								Show Gratitude towards others :)
 							</div>
 							<div>
 								<label
@@ -208,9 +262,33 @@ function App() {
 							<button
 								onClick={handleGratitudeSubmit}
 								type="button"
+								disabled={loading}
 								className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full text-center justify-center"
 							>
-								Send
+								{loading ? (
+									<svg
+										class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											class="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											stroke-width="4"
+										></circle>
+										<path
+											class="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
+									</svg>
+								) : (
+									"Send"
+								)}
 							</button>
 						</div>
 					</div>
@@ -223,7 +301,30 @@ function App() {
 						onClick={handleConnectWallet}
 						className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 					>
-						Connect
+						{loading ? (
+							<svg
+								class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+						) : (
+							"Connect"
+						)}
 					</button>
 				</div>
 			)}

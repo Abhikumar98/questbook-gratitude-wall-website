@@ -84,8 +84,12 @@ export const connectWallet = async () => {
 	}
 };
 
-export const minimizeAddress = (address) => {
+export const minimizeAddress = (address, user = "") => {
 	if (!address) return "";
+
+	if (user.toLowerCase() === address.toLowerCase()) {
+		return "You";
+	}
 
 	return (
 		address.substring(0, 6) + "..." + address.substring(address.length - 4)
